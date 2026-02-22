@@ -1,0 +1,25 @@
+# Environnement virtuel
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Données brutes (trop lourdes pour GitHub)
+data/raw/
+
+# Modèles sauvegardés (lourds)
+models/*.pkl
+models/*.joblib
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
