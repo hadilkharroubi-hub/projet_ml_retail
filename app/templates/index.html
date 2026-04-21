@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse Clientèle ML</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+        h1 { color: #2c3e50; text-align: center; }
+        .form-group { margin: 15px 0; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #2980b9; }
+        #result { margin-top: 30px; padding: 20px; border-radius: 10px; display: none; }
+        .churn { background: #fdecea; border-left: 5px solid #e74c3c; }
+        .loyal { background: #eafaf1; border-left: 5px solid #27ae60; }
+        .result-item { margin: 10px 0; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>🛍️ Analyse Comportementale Clientèle</h1>
+    <p style="text-align:center; color:#777">Prédiction du Churn et Segmentation Client</p>
+
+    <div class="form-group">
+        <label>Recency (jours depuis dernier achat)</label>
+        <input type="number" id="Recency" value="30">
+    </div>
+    <div class="form-group">
+        <label>Frequency (nombre de commandes)</label>
+        <input type="number" id="Frequency" value="5">
+    </div>
+    <div class="form-group">
+        <label>MonetaryTotal (total dépensé £)</label>
+        <input type="number" id="MonetaryTotal" value="500">
+    </div>
+    <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="Age" value="35">
+    </div>
+    <div class="form-group">
+        <label>CustomerTenureDays (ancienneté en jours)</label>
+        <input type="number" id="CustomerTenureDays" value="365">
+    </div>
+    <div class="form-group">
+        <label>SatisfactionScore (1 à 5)</label>
+        <input type="number" id="SatisfactionScore" min="1" max="5" value="4">
+    </div>
+
+    <button onclick="predict()"> Analyser ce client</button>
+
+    <div id="result">
+        <div class="result-item" id="churn_label"></div>
+        <div class="result-item" id="churn_prob"></div>
+        <div class="result-item" id="segment"></div>
+    </div>
+
+    <script>
+        async function predict() {
+            const data = {
+                Recency:             parseFloat(document.getElementById('Recency').value) || 0,
+                Frequency:           parseFloat(document.getElementById('Frequency').value) || 0,
+                MonetaryTotal:       parseFloat(document.getElementById('MonetaryTotal').value) || 0,
+                Age:                 parseFloat(document.getElementById('Age').value) || 0,
+                CustomerTenureDays:  parseFloat(document.getElementById('CustomerTenureDays').value) || 0,
+                SatisfactionScore:   parseFloat(document.getElementById('SatisfactionScore').value) || 0
+            };
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+                alert('Erreur : ' + result.error);
+                return;
+            }
+
+            const div = document.getElementById('result');
+            div.style.display = 'block';
+            div.className = result.churn_prediction === 1 ? 'churn' : 'loyal';
+
+            document.getElementById('churn_label').innerHTML = `<strong>Statut :</strong> ${result.churn_label}`;
+            document.getElementById('churn_prob').innerHTML  = `<strong>Probabilité de churn :</strong> ${result.churn_probability}%`;
+            document.getElementById('segment').innerHTML     = `<strong>Segment :</strong> ${result.segment}`;
+        }
+    </script>
+</body>
+</html>
