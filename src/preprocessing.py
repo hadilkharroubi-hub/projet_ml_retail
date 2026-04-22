@@ -58,7 +58,7 @@ ordinal_mappings = {
 for col, categories in ordinal_mappings.items():
     if col in df.columns:
         df[col] = pd.Categorical(df[col], categories=categories, ordered=True).codes
-        print(f"✅ Encodage ordinal : {col}")
+        print(f" Encodage ordinal : {col}")
 
 # --- One-Hot encoding ---
 onehot_cols = [
@@ -68,24 +68,24 @@ onehot_cols = [
 ]
 onehot_cols = [c for c in onehot_cols if c in df.columns]
 df = pd.get_dummies(df, columns=onehot_cols, drop_first=False)
-print(f"✅ One-Hot encoding appliqué sur : {onehot_cols}")
+print(f" One-Hot encoding appliqué sur : {onehot_cols}")
 
 # --- Target encoding pour Country ---
 if 'Country' in df.columns:
     country_freq = df['Country'].value_counts(normalize=True)
     df['Country'] = df['Country'].map(country_freq)
-    print("✅ Target encoding : Country")
+    print(" Target encoding : Country")
 
 # --- Supprimer CustomerID ---
 if 'CustomerID' in df.columns:
     df.drop(columns=['CustomerID'], inplace=True)
-    print("✅ Supprimé : CustomerID")
+    print(" Supprimé : CustomerID")
 
 # ============================================================
 # 6. SAUVEGARDE DONNÉES NETTOYÉES
 # ============================================================
 df.to_csv('../data/processed/data_cleaned.csv', index=False)
-print("\n✅ Données nettoyées sauvegardées → data/processed/data_cleaned.csv")
+print("\n Données nettoyées sauvegardées → data/processed/data_cleaned.csv")
 print(f"   Shape finale : {df.shape}")
 
 # ============================================================
@@ -117,6 +117,6 @@ y_train.to_csv('../data/train_test/y_train.csv',         index=False)
 y_test.to_csv('../data/train_test/y_test.csv',           index=False)
 joblib.dump(scaler, '../models/scaler.joblib')
 
-print("\n✅ Train/Test sauvegardés → data/train_test/")
+print("\n Train/Test sauvegardés → data/train_test/")
 print(f"   X_train: {X_train_scaled.shape} | X_test: {X_test_scaled.shape}")
 print(f"   Distribution Churn train:\n{y_train.value_counts()}")

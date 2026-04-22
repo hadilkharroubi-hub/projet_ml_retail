@@ -6,7 +6,7 @@ from sklearn.impute import KNNImputer
 def load_data(path):
     """Charge les données depuis un CSV"""
     df = pd.read_csv(path)
-    print(f"✅ Données chargées : {df.shape[0]} lignes, {df.shape[1]} colonnes")
+    print(f" Données chargées : {df.shape[0]} lignes, {df.shape[1]} colonnes")
     return df
 
 def missing_report(df):
@@ -21,7 +21,7 @@ def fix_support_tickets(df):
     df = df.copy()
     if 'SupportTicketsCount' in df.columns:
         df['SupportTicketsCount'] = df['SupportTicketsCount'].replace({999: np.nan, -1: np.nan})
-        print("✅ SupportTicketsCount nettoyé")
+        print(" SupportTicketsCount nettoyé")
     return df
 
 def fix_satisfaction(df):
@@ -29,7 +29,7 @@ def fix_satisfaction(df):
     df = df.copy()
     if 'SatisfactionScore' in df.columns:
         df['SatisfactionScore'] = df['SatisfactionScore'].replace({-1: np.nan, 99: np.nan, 0: np.nan})
-        print("✅ SatisfactionScore nettoyé")
+        print(" SatisfactionScore nettoyé")
     return df
 
 def parse_registration_date(df):
@@ -42,7 +42,7 @@ def parse_registration_date(df):
         df['RegDay']     = df['RegistrationDate'].dt.day
         df['RegWeekday'] = df['RegistrationDate'].dt.weekday
         df.drop(columns=['RegistrationDate'], inplace=True)
-        print("✅ RegistrationDate parsée et supprimée")
+        print(" RegistrationDate parsée et supprimée")
     return df
 
 def parse_last_login_ip(df):
@@ -54,7 +54,7 @@ def parse_last_login_ip(df):
             lambda x: 1 if str(x).startswith(('192.168', '10.', '172.')) else 0
         )
         df.drop(columns=['LastLoginIP'], inplace=True)
-        print("✅ LastLoginIP parsée et supprimée")
+        print(" LastLoginIP parsée et supprimée")
     return df
 
 def drop_useless_features(df):
@@ -62,7 +62,7 @@ def drop_useless_features(df):
     df = df.copy()
     if 'NewsletterSubscribed' in df.columns:
         df.drop(columns=['NewsletterSubscribed'], inplace=True)
-        print("✅ Supprimé : NewsletterSubscribed")
+        print(" Supprimé : NewsletterSubscribed")
     return df
 
 def feature_engineering(df):
@@ -71,7 +71,7 @@ def feature_engineering(df):
     df['MonetaryPerDay']  = df['MonetaryTotal'] / (df['Recency'] + 1)
     df['AvgBasketValue']  = df['MonetaryTotal'] / df['Frequency']
     df['TenureRatio']     = df['Recency'] / (df['CustomerTenureDays'] + 1)
-    print("✅ Feature engineering terminé")
+    print(" Feature engineering terminé")
     return df
 
 def impute_missing(df, numeric_cols, strategy='median'):
@@ -82,5 +82,5 @@ def impute_missing(df, numeric_cols, strategy='median'):
                 df[col] = df[col].fillna(df[col].median())
             elif strategy == 'mean':
                 df[col] = df[col].fillna(df[col].mean())
-    print("✅ Imputation terminée")
+    print(" Imputation terminée")
     return df

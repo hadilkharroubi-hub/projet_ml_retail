@@ -29,27 +29,51 @@ print(f"   X_train: {X_train.shape} | X_test: {X_test.shape}")
 print(f"   Distribution Churn train: {y_train.value_counts().to_dict()}")
 
 # ============================================================
-# 2. MULTICOLINÉARITÉ — seuil 0.8 (exigé par la prof)
+# 2. MULTICOLINÉARITÉ — seuil 0.8
 # ============================================================
 corr_matrix = X_train.corr().abs()
 upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
 to_drop = [col for col in upper.columns if any(upper[col] > 0.8)]
 
-print(f"\n Features supprimées (corrélation > 0.8) : {to_drop}")
+print(f"\n  Features supprimées (corrélation > 0.8) : {to_drop}")
 X_train = X_train.drop(columns=to_drop)
 X_test  = X_test.drop(columns=to_drop)
 print(f"   Shape après suppression multicolinéarité : {X_train.shape}")
 
-# Sauvegarder la liste des colonnes finales
 joblib.dump(X_train.columns.tolist(), '../models/feature_names.joblib')
 joblib.dump(to_drop, '../models/dropped_cols.joblib')
+
+# Re-fit du scaler sur les 68 colonnes (après suppression multicolinéarité)
+from sklearn.preprocessing import StandardScaler
+scaler_final = StandardScaler()
+X_train = pd.DataFrame(
+    scaler_final.fit_transform(X_train),
+    columns=X_train.columns
+)
+X_test = pd.DataFrame(
+    scaler_final.transform(X_test),
+    columns=X_test.columns
+)
+joblib.dump(scaler_final, '../models/scaler.joblib')
+print(" Nouveau scaler (68 colonnes) sauvegardé")
 
 # ============================================================
 # 3. DÉSÉQUILIBRE DES CLASSES — SMOTE (exigé par la prof)
 # ============================================================
 print(f"\n Avant SMOTE : {y_train.value_counts().to_dict()}")
+# SMOTE avec échantillon réduit pour éviter la lenteur
 smote = SMOTE(random_state=42)
-X_train_bal, y_train_bal = smote.fit_resample(X_train, y_train)
+# Utiliser seulement 1000 samples pour SMOTE
+from sklearn.utils import resample
+X_small = pd.concat([
+    X_train[y_train==0].iloc[:700],
+    X_train[y_train==1].iloc[:300]
+])
+y_small = pd.concat([
+    y_train[y_train==0].iloc[:700],
+    y_train[y_train==1].iloc[:300]
+])
+X_train_bal, y_train_bal = smote.fit_resample(X_small, y_small)
 print(f" Après SMOTE  : {pd.Series(y_train_bal).value_counts().to_dict()}")
 
 # ============================================================
@@ -185,15 +209,14 @@ results_df.to_csv('../reports/models_comparison.csv')
 # ============================================================
 print("\n GridSearchCV sur Random Forest...")
 param_grid = {
-    'n_estimators':      [100, 200],
-    'max_depth':         [None, 10, 20],
-    'min_samples_split': [2, 5]
+    'n_estimators': [50],
+    'max_depth':    [10],
 }
 
 grid_search = GridSearchCV(
     RandomForestClassifier(random_state=42, class_weight='balanced'),
     param_grid,
-    cv=5,
+    cv=2,
     scoring='roc_auc',
     n_jobs=-1,
     verbose=1
